@@ -1,9 +1,10 @@
 import React, { use } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { AuthContext } from '../Provider/AuthProvider';
 
 const Registration = () => {
-    const { createUser, setUser } = use(AuthContext)
+    const navigate=useNavigate()
+    const { createUser, setUser, updateUser } = use(AuthContext)
 
     const handleForm = (e) => {
         e.preventDefault()
@@ -12,13 +13,21 @@ const Registration = () => {
         const email = form.email.value
         const photo = form.photo.value
         const password = form.password.value
-        console.log({ name, email, photo, password });
+        // console.log({ name, email, photo, password });
 
         createUser(email, password)
             .then(result => {
                 const user = result.user
                 // console.log(user);
-                setUser(user)
+                updateUser({ displayName: name, photoURL: photo })
+                    .then(() => {
+                        setUser({ ...user, displayName: name, photoURL: photo })
+                        navigate('/')
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        setUser(user)
+                    })
             })
             .catch(error => {
                 const errorMessage = error.message
@@ -38,7 +47,7 @@ const Registration = () => {
                         <input type="text" name="name" id="" placeholder='Enter your name' className='input bg-base-200' required />
 
                         <label className="label font-bold">Photo Url</label>
-                        <input type="text" name="photo" id="" className="input bg-base-200" placeholder='Enter url' required />
+                        <input type="url" name="photo" id="" className="input bg-base-200" placeholder='Enter url' required />
 
                         <label className="label font-bold">Email Address</label>
                         <input name='email' type="email" className="input bg-base-200" placeholder="Enter your email address" required />
